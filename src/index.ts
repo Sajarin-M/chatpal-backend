@@ -2,8 +2,11 @@ import express from 'express';
 import cors from 'cors';
 import { router } from './trpc';
 import * as trpcExpress from '@trpc/server/adapters/express';
+import { usersRouter } from './routers/users';
 
-export const appRouter = router({});
+export const appRouter = router({
+  users: usersRouter,
+});
 
 const app = express();
 
