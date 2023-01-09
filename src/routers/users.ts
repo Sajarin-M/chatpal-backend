@@ -1,7 +1,13 @@
 import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
-import { prisma } from '../prisma';
+import { prisma, Prisma } from '../prisma';
 import { publicProcedure, router } from '../trpc';
+
+const userSelect: Prisma.UserSelect = {
+  id: true,
+  name: true,
+  email: true,
+};
 
 export const usersRouter = router({
   signup: publicProcedure
@@ -15,7 +21,9 @@ export const usersRouter = router({
     .mutation(async ({ input }) => {
       const user = await prisma.user.create({
         data: input,
+        select: userSelect,
       });
+      console.log('user created', user);
 
       return { token: 'hi' };
     }),
@@ -32,6 +40,7 @@ export const usersRouter = router({
           email: username,
           password,
         },
+        select: userSelect,
       });
       if (!user) {
         throw new TRPCError({
@@ -39,6 +48,6 @@ export const usersRouter = router({
           message: 'Invalid username or password',
         });
       }
-      return { token: 'hi' };
+      return { token: 'hi', user };
     }),
 });
