@@ -2,6 +2,9 @@ import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
 import { prisma, Prisma } from '../prisma';
 import { publicProcedure, router } from '../trpc';
+import jwt from 'jsonwebtoken';
+
+const privateKey = 'temp-key';
 
 const userSelect: Prisma.UserSelect = {
   id: true,
@@ -23,9 +26,8 @@ export const usersRouter = router({
         data: input,
         select: userSelect,
       });
-      console.log('user created', user);
 
-      return { token: 'hi' };
+      return { token: jwt.sign(user, privateKey) };
     }),
   login: publicProcedure
     .input(
@@ -48,6 +50,6 @@ export const usersRouter = router({
           message: 'Invalid username or password',
         });
       }
-      return { token: 'hi', user };
+      return { token: jwt.sign(user, privateKey) };
     }),
 });
