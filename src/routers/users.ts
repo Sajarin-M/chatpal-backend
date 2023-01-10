@@ -1,8 +1,8 @@
+import { Prisma } from '@prisma/client';
 import { TRPCError } from '@trpc/server';
-import { z } from 'zod';
-import { prisma, Prisma } from '../prisma';
-import { publicProcedure, router } from '../trpc';
 import jwt from 'jsonwebtoken';
+import { z } from 'zod';
+import { publicProcedure, router } from '../trpc';
 
 const privateKey = 'temp-key';
 
@@ -21,8 +21,8 @@ export const usersRouter = router({
         password: z.string(),
       }),
     )
-    .mutation(async ({ input }) => {
-      const user = await prisma.user.create({
+    .mutation(async ({ ctx, input }) => {
+      const user = await ctx.prisma.user.create({
         data: input,
         select: userSelect,
       });
@@ -36,8 +36,8 @@ export const usersRouter = router({
         password: z.string(),
       }),
     )
-    .mutation(async ({ input: { username, password } }) => {
-      const user = await prisma.user.findFirst({
+    .mutation(async ({ ctx, input: { username, password } }) => {
+      const user = await ctx.prisma.user.findFirst({
         where: {
           email: username,
           password,

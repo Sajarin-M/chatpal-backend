@@ -1,12 +1,12 @@
-import { User } from './prisma';
+import { User } from '@prisma/client';
 import { initTRPC, TRPCError } from '@trpc/server';
-import jwt from 'jsonwebtoken';
 import { Request, Response } from 'express';
+import jwt from 'jsonwebtoken';
 import { prisma } from './prisma';
 
-export function createContext({ req }: { req: Request; res: Response }) {
+export function createContext({ req, res }: { req: Request; res: Response }) {
   const token = req.headers.authorization;
-  return { token, prisma };
+  return { req, res, token, prisma, verify: jwt.verify };
 }
 
 export type Context = ReturnType<typeof createContext>;
@@ -21,9 +21,11 @@ const isAuthed = t.middleware(({ next, ctx }) => {
   }
 
   try {
-    const decoded = jwt.verify(ctx.token, privateKey) as Pick<User, 'id' | 'email' | 'name'>;
+    const decoded = ctx.verify(ctx.token, privateKey) as Pick<User, 'id' | 'email' | 'name'>;
+    console.log(decoded);
     return next({
       ctx: {
+        ...ctx,
         user: decoded,
       },
     });
